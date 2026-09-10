@@ -1,0 +1,6 @@
+# Local config (contains database credentials)
+app/config/config.ini
+
+.DS_Store
+.idea/
+.vscode/
