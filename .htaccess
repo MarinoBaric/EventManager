@@ -1,0 +1,39 @@
+# ------------------------------------------------------------------------------
+# Redirect all HTTP requests to the router
+# ------------------------------------------------------------------------------
+
+# 1. Disable MultiView option.
+# If a requested resource does not exist, MultiViews feature makes the web server 
+# look for the closest match and load that resource. The MultiViews can cause 
+# URL redirect and rewrite problems. Example: if the 'configuration/' folder and
+# the 'configuration.php' file are in the root of your site and you are trying to
+# reach the address 'mysite.com/configuration', you will be automatically 
+# redirected to the configuration.php file if the MultiViews option is enabled.
+Options -MultiViews
+DirectoryIndex Index.php
+
+# 2. Turn on the rewrite engine
+RewriteEngine On
+
+# 3. Specify the base path for the RewriteRule directive (path after 'localhost').
+RewriteBase /Project1/
+
+# 4. Specify rewrite conditions.
+# Rewrite rule will ONLY be applied to requests for non-existing resources. We do 
+# not want to rewrite requests for static content found in the public folder.
+# Hence, apply the rewrite rule only if the requested resource does not exist 
+# (if it is not a file nor a folder):  
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# 5. Specify the rewrite route. 
+# Redirect everything to Index.php & preserve the original query string. 
+#  - Example: /user/delete/3  => /Index.php?/user/delete/3
+# ------------------------------------------------------------------------------
+# Rewrite Format: RewriteRule Pattern Substitution [Flags]
+#  - PATTERN: Regex ^(.*)$ matches any request path, like /about, /foo/bar, /index.php, etc
+#  - SUBSTITUTION: The Index.php?$1 makes all requests being sent to Index.php, 
+#    starting with a query string marker ?. $1 inserts whatever was matched by (.*) in the pattern.
+#  - FLAG: The Query String Append (QSA) flag appends any query string from the original URL, 
+#  - FLAG: The Last Rule (L) flag stops processing other rewrite rules once this one matches.
+RewriteRule ^(.*)$ Index.php?$1 [QSA,L]
