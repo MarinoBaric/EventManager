@@ -88,4 +88,28 @@ final class Router {
             throw new Exception("Controller class '$this->controller' not found");
         }
     }
+
+    /**
+     * Parses the query string. Extracts the name of the controller, the action, 
+     * and the parameters from the query string. The extracted values are stored 
+     * as private properties of this object.
+     * 
+     * @param string $query_string The query string from the URL.
+     * @return array|bool Returns an array with controller, action, and params if the query string matches the pattern, false otherwise.
+     */
+    private function parse($query_string) {
+        if (preg_match($this->pattern, $query_string, $matches)) {
+            $controller = ucfirst($matches["controller"]) . 'Controller'; // user --> UserController
+            $action = $matches["action"];
+            // 1. Remove '/' from the left side of the params string: /3/4 --> 3/4
+            // 2. Split the params string using the "/" seperator: 3/4 --> ["3", "4"]
+            $params = explode("/", ltrim($matches["params"], "/"));
+            return [
+                'controller' => $controller,
+                'action' => $action,
+                'params' => $params
+            ];
+        }
+        return false;
+    }
 }
