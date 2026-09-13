@@ -49,4 +49,51 @@ final class Index {
         spl_autoload_register(['Index', 'loadClass']);        
         
     }
+
+    /**
+     * Autoloads the class files. This method attempts to load a class file from 
+     * a predefined set of directories.
+     * 
+     * @param string $class_name The name of the class to load.
+     * @return bool Returns true if the class file was loaded, false otherwise.
+     */
+    private static function loadClass($class_name) {
+        // Define an array of directories of classes to be loaded on request.
+        $dirs = array(
+            'app/',
+            'app/router/',
+            'app/model/',
+            'app/view/',
+            'app/controller/',
+            'app/filter/',
+            'app/db/',
+            'app/service/'
+        );
+
+        // Loop through each directory to load all the class files. It will only require a file once.
+        // If it finds the same class in a directory later on, IT WILL IGNORE IT! Because of that require once.
+        foreach ($dirs as $dir) {
+            if (file_exists($dir . $class_name . '.php')) {
+                require_once($dir . $class_name . '.php');
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Handles the incoming request. This method creates a new Router object and 
+     * dispatches the request. The request is dispatched by providing the router 
+     * with the query string used to access the page.
+     * 
+     * @see <a href="https://www.php.net/manual/en/reserved.variables.server.php">$_SERVER</a>
+     */
+    private static function handle() {
+
+        $router = new Router();
+        $router->dispatch($_SERVER["QUERY_STRING"]); // user/get/3
+    }
 }
+
+// Run the application.
+Index::run();
