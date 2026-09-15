@@ -105,4 +105,30 @@ class Model {
 
         return true;
     }
+    
+    /**
+     * Model constructor. Initiates a database connection upon instantiation.
+     */
+    public function __construct(){
+        $this->connect();
+    }
+
+    /**
+     * Establishes a database connection using PDO.
+     *
+     * @throws PDOException if connection fails.
+     */
+    private function connect(): void {
+        if ($this->connection == null) {
+            try {
+                $this->connection = new PDO(
+                        CONFIG_DATA['db']['dsn'],
+                        CONFIG_DATA['db']['username'],
+                        CONFIG_DATA['db']['password'],
+                        $this->settings);
+            } catch (PDOException $e) {
+                throw new PDOException($e->getMessage(), (int) $e->getCode());
+            }
+        }
+    }
 }
