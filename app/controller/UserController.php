@@ -40,4 +40,46 @@ class UserController extends Controller {
             header('location: ' . PROJECT_URL);
         }
     }
+
+    /**
+     * Displays the registration form.
+     *
+     * @return void
+    */
+
+    public function register(): void {
+        $this->view();
+    }
+
+    /**
+     * Saves a new user and returns to the login page.
+     *
+     * @return void
+    */
+    public function insertuser(): void {
+        $ok = $this->model()->insert(
+            $_POST['firstName'],
+            $_POST['lastName'],
+            $_POST['email'],
+            $_POST['username'],
+            $_POST['password']
+        );
+
+        if ($ok) {
+            header('location: ' . PROJECT_URL . '/user/login');
+        } else {
+            header('location: ' . PROJECT_URL . '/user/register');
+        }
+        exit();
+    }
+
+    /**
+     * Logs the user out by redirecting them to the home page.
+     *
+     * @return void
+     */
+
+    public function logout() : void {
+        Session::destroy();
+    }
 }
