@@ -1,0 +1,54 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+h1 {
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+}
+
+nav {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+nav a {
+    margin: 0 10px;
+}
+
+form {
+    width: 300px;
+    margin: 0 auto;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+select {
+    width: 100%;
+    padding: 8px;
+}
+
+button {
+    padding: 7px 12px;
+    cursor: pointer;
+}
+
+a {
+    color: #0066cc;
+}
+
+hr {
+    margin: 25px 0;
+}
+
