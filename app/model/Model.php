@@ -131,4 +131,63 @@ class Model {
             }
         }
     }
+
+    /**
+     * Executes a query and returns the PDOStatement object.
+     *
+     * @param string $query The SQL query to execute.
+     * @param array $params Optional parameters for the SQL query.
+     * @return PDOStatement The PDOStatement object after execution.
+     * @throws PDOException if the query fails.
+     */
+    private function executeQuery(string $query, array $params = []): PDOStatement {
+        try {
+            $statement = $this->connection->prepare($query);
+            $statement->execute($params);
+            return $statement;
+        } catch (PDOException $e) {
+            throw new PDOException($e->getMessage(), (int) $e->getCode());
+        }
+    }
+
+    /**
+     * Executes a query and returns a single row as an object of the specified class.
+     *
+     * @param string $query The SQL query to execute.
+     * @param string $className The name of the class to instantiate.
+     * @param array $params Optional parameters for the SQL query.
+     * @return object|false The resulting object or false if no rows found.
+     */
+    protected function queryOne(string $query, string $className, array $params = []): object|false {
+        $statement = $this->executeQuery($query, $params);
+        return $statement->fetchObject($className);
+    }
+
+    /**
+     * Executes a query and returns all matching rows as objects of the specified class.
+     *
+     * @param string $query The SQL query to execute.
+     * @param string $className The name of the class to instantiate.
+     * @param array $params Optional parameters for the SQL query.
+     * @return array The resulting array of objects.
+     */
+    protected function queryAll(string $query, string $className, array $params = []): array {
+        $statement = $this->executeQuery($query, $params);
+        return $statement->fetchAll(PDO::FETCH_CLASS, $className);
+    }
+
+    /**
+     * Executes a query and returns the number of affected rows.
+     *
+     * @param string $query The SQL query to execute.
+     * @param array $params Optional parameters for the SQL query.
+     * @return int The number of affected rows.
+     */
+    protected function query(string $query, array $params = []): int {
+        $statement = $this->executeQuery($query, $params);
+        return $statement->rowCount();
+    }
+
+    
+
 }
