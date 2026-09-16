@@ -139,4 +139,68 @@ class UserModel extends Model {
 
         return null;
     }
+
+    /**
+     * Retrieves a user by username, including the name of their role.
+     *
+     * @param string $username The username to look for.
+     * @return object|false The UserModel object if found, false otherwise.
+    */
+    public function getByUsername(string $username): object|false {
+        return $this->queryOne(
+            'SELECT attendee.attendee_id, attendee.first_name, attendee.last_name,
+                    attendee.email, attendee.username, attendee.password,
+                    role.name AS role_name
+             FROM attendee
+             JOIN role ON attendee.role_id = role.role_id
+             WHERE attendee.username = :username', 'UserModel',
+            ['username' => $username]
+        );
+    }
+
+    /**
+     * Inserts a new user with a hashed password.
+     *
+     * @param string $role The name of the role; defaults to attendee.
+     * @return bool True if the user was inserted, false if validation failed.
+     */
+    public function insert(string $firstName, string $lastName, string $email, string $username, string $password,
+                           string $role = 'attendee'): bool {
+        $input = [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $email,
+            'username' => $username,
+            'password' => $password,
+            'role' => $role
+        ];
+
+        $input = $this->sanitize($input);
+
+        if (!$this->validate($input, $this->validationRules)) {
+            return false;
+        }
+
+        $roleModel = new RoleModel();
+        $userRole = $roleModel->getByName($input['role']);
+
+        if (!$userRole) {
+            return false;
+        }
+
+        $this->query(
+            'INSERT INTO attendee (first_name, last_name, email, username, password, role_id)
+             VALUES (:first_name, :last_name, :email, :username, :password, :role_id)',
+            [
+                'first_name' => $input['first_name'],
+                'last_name' => $input['last_name'],
+                'email' => $input['email'],
+                'username' => $input['username'],
+                'password' => password_hash($input['password'], PASSWORD_DEFAULT),
+                'role_id' => $userRole->getRoleId()
+            ]
+        );
+
+        return true;
+    }
 }
