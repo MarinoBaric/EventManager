@@ -98,4 +98,49 @@ class AdminController extends Controller {
 
         exit();
     }
+
+    /**
+     * Displays the form for adding a new event.
+     *
+     * @return void
+    */
+    public function addevent(): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $venueModel = new VenueModel();
+        $data = ['role' => $_SESSION['role'], 'venues' => $venueModel->getAll()];
+        $this->view($data);
+    }
+
+    /**
+     * Saves a new event and returns to the admin page.
+     *
+     * @return void
+    */
+    public function insertevent(): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $eventModel = new EventModel();
+        $ok = $eventModel->insert(
+            $_POST['eventName'],
+            $_POST['startDate'],
+            $_POST['endDate'],
+            $_POST['allowedNumber'],
+            $_POST['venue']
+        );
+
+        if ($ok) {
+            header('location: ' . PROJECT_URL . '/admin/admin');
+        } else {
+            header('location: ' . PROJECT_URL . '/admin/addevent');
+        }
+
+        exit();
+    }
 }
