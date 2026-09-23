@@ -143,4 +143,20 @@ class AdminController extends Controller {
 
         exit();
     }
+
+    /**
+     * Displays the list of all venues.
+     *
+     * @return void
+     */
+    public function venues(): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $venueModel = new VenueModel();
+        $data = ['role' => $_SESSION['role'], 'venues' => $venueModel->getAll()];
+        $this->view($data);
+    }
 }
