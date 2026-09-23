@@ -102,4 +102,79 @@ class EventModel extends Model{
             ['id' => $id]
         );
     }
+
+    /**
+     * Deletes an event and all registrations for it.
+     *
+     * @param int $id The id of the event.
+     * @return int The number of deleted rows.
+    */
+    public function delete(int $id): int {
+        $this->query('DELETE FROM attendee_event WHERE event_id = :id', ['id' => $id]);
+        return $this->query('DELETE FROM event WHERE event_id = :id', ['id' => $id]);
+    }
+
+    /**
+     * Updates an existing event.
+     *
+     * @return int The number of updated rows.
+    */
+    public function update(int $id, string $name, string $startDate,
+                           string $endDate, int $allowedNumber, int $venueId): bool {
+        $input = [
+            'name' => $name,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'allowed_number' => $allowedNumber,
+            'venue_id' => $venueId
+        ];
+
+        $input = $this->sanitize($input);
+
+        if (!$this->validate($input, $this->validationRules)) {
+            return false;
+        }
+
+        $input['id'] = $id;
+
+        $this->query(
+            'UPDATE event
+             SET name = :name, start_date = :start_date, end_date = :end_date,
+                 allowed_number = :allowed_number, venue_id = :venue_id
+             WHERE event_id = :id',
+            $input
+        );
+
+        return true;
+    }
+
+    /**
+     * Inserts a new event.
+     *
+     * @return int The number of inserted rows.
+    */
+    public function insert(string $name, string $startDate, string $endDate,
+                           int $allowedNumber, int $venueId): bool {
+        $input = [
+            'name' => $name,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'allowed_number' => $allowedNumber,
+            'venue_id' => $venueId
+        ];
+
+        $input = $this->sanitize($input);
+
+        if (!$this->validate($input, $this->validationRules)) {
+            return false;
+        }
+
+        $this->query(
+            'INSERT INTO event (name, start_date, end_date, allowed_number, venue_id)
+             VALUES (:name, :start_date, :end_date, :allowed_number, :venue_id)',
+            $input
+        );
+
+        return true;
+    }
 }
