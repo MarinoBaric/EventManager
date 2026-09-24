@@ -60,4 +60,54 @@ class VenueModel extends Model {
             'VenueModel', ['id' => $id]
         );
     }
+
+    /**
+     * Inserts a new venue.
+     *
+     * @param string $name The name of the venue.
+     * @param int $capacity The capacity of the venue.
+     * @return bool True if the venue was inserted, false if validation failed.
+     */
+    public function insert(string $name, int $capacity): bool {
+        $input = ['name' => $name, 'capacity' => $capacity];
+        $input = $this->sanitize($input);
+
+        if (!$this->validate($input, $this->validationRules)) {
+            return false;
+        }
+
+        $this->query('INSERT INTO venue (name, capacity) VALUES (:name, :capacity)', $input);
+        return true;
+    }
+
+    /**
+     * Updates an existing venue.
+     *
+     * @param int $id The id of the venue.
+     * @param string $name The name of the venue.
+     * @param int $capacity The capacity of the venue.
+     * @return bool True if the venue was updated, false if validation failed.
+     */
+    public function update(int $id, string $name, int $capacity): bool {
+        $input = ['name' => $name, 'capacity' => $capacity];
+        $input = $this->sanitize($input);
+
+        if (!$this->validate($input, $this->validationRules)) {
+            return false;
+        }
+
+        $input['id'] = $id;
+        $this->query('UPDATE venue SET name = :name, capacity = :capacity WHERE venue_id = :id', $input);
+        return true;
+    }
+
+    /**
+     * Deletes a venue.
+     *
+     * @param int $id The id of the venue.
+     * @return int The number of deleted rows.
+     */
+    public function delete(int $id): int {
+        return $this->query('DELETE FROM venue WHERE venue_id = :id', ['id' => $id]);
+    }
 }
