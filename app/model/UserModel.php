@@ -203,4 +203,93 @@ class UserModel extends Model {
 
         return true;
     }
+
+    /**
+     * Retrieves all users together with the name of their role.
+     *
+     * @return array The array of UserModel objects.
+     */
+    public function getAll(): array {
+        return $this->queryAll(
+            'SELECT attendee.attendee_id, attendee.first_name, attendee.last_name,
+                    attendee.email, attendee.username, role.name AS role_name
+             FROM attendee
+             JOIN role ON attendee.role_id = role.role_id
+             ORDER BY attendee.last_name', 'UserModel'
+        );
+    }
+
+    /**
+     * Retrieves a single user by id.
+     *
+     * @param int $id The id of the user.
+     * @return object|false The UserModel object if found, false otherwise.
+     */
+    public function getById(int $id): object|false {
+        return $this->queryOne(
+            'SELECT attendee.attendee_id, attendee.first_name, attendee.last_name,
+                    attendee.email, attendee.username, role.name AS role_name
+             FROM attendee
+             JOIN role ON attendee.role_id = role.role_id
+             WHERE attendee.attendee_id = :id', 'UserModel',
+            ['id' => $id]
+        );
+    }
+
+    /**
+     * Updates an existing user. The password is not changed here.
+     *
+     * @return bool True if the user was updated, false if validation failed.
+     */
+    public function update(int $id, string $firstName, string $lastName, string $email, string $username, string $role): bool {
+        $input = [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $email,
+            'username' => $username,
+            'role' => $role
+        ];
+
+        $input = $this->sanitize($input);
+
+        if (!$this->validate($input, $this->validationRules)) {
+            return false;
+        }
+
+        $roleModel = new RoleModel();
+        $userRole = $roleModel->getByName($input['role']);
+
+        if (!$userRole) {
+            return false;
+        }
+
+        $this->query(
+            'UPDATE attendee
+             SET first_name = :first_name, last_name = :last_name, email = :email,
+                 username = :username, role_id = :role_id
+             WHERE attendee_id = :id',
+            [
+                'first_name' => $input['first_name'],
+                'last_name' => $input['last_name'],
+                'email' => $input['email'],
+                'username' => $input['username'],
+                'role_id' => $userRole->getRoleId(),
+                'id' => $id
+            ]
+        );
+
+        return true;
+    }
+
+
+    /**
+     * Deletes a user and all their event registrations.
+     *
+     * @param int $id The id of the user.
+     * @return int The number of deleted rows.
+     */
+    public function delete(int $id): int {
+        $this->query('DELETE FROM attendee_event WHERE attendee_id = :id', ['id' => $id]);
+        return $this->query('DELETE FROM attendee WHERE attendee_id = :id', ['id' => $id]);
+    }
 }
