@@ -159,4 +159,98 @@ class AdminController extends Controller {
         $data = ['role' => $_SESSION['role'], 'venues' => $venueModel->getAll()];
         $this->view($data);
     }
+
+    /**
+     * Displays the form for adding a new venue.
+     *
+     * @return void
+     */
+    public function addvenue(): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $data = ['role' => $_SESSION['role']];
+        $this->view($data);
+    }
+
+    /**
+     * Saves a new venue and returns to the list of venues.
+     *
+     * @return void
+     */
+    public function insertvenue(): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $venueModel = new VenueModel();
+        if ($venueModel->insert($_POST['venueName'], $_POST['capacity'])) {
+            header('location: ' . PROJECT_URL . '/admin/venues');
+        } else {
+            header('location: ' . PROJECT_URL . '/admin/addvenue');
+        }
+        exit();
+    }
+
+    /**
+     * Displays the form for editing a venue.
+     *
+     * @param array $params The route parameters; the first one is the venue id.
+     * @return void
+     */
+    public function editvenue(array $params): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $venueModel = new VenueModel();
+        $venue = $venueModel->getById($params[0]);
+
+        if ($venue) {
+            $data = ['role' => $_SESSION['role'], 'venue' => $venue];
+            $this->view($data);
+        } else {
+            header('location: ' . PROJECT_URL . '/admin/venues');
+            exit();
+        }
+    }
+
+    /**
+     * Saves the submitted venue data and returns to the list of venues.
+     *
+     * @return void
+     */
+    public function updatevenue(): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $venueModel = new VenueModel();
+        $venueModel->update($_POST['venue_id'], $_POST['venueName'], $_POST['capacity']);
+        header('location: ' . PROJECT_URL . '/admin/venues');
+        exit();
+    }
+
+    /**
+     * Deletes a venue and returns to the list of venues.
+     *
+     * @param array $params The route parameters; the first one is the venue id.
+     * @return void
+     */
+    public function deletevenue(array $params): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $venueModel = new VenueModel();
+        $venueModel->delete($params[0]);
+        header('location: ' . PROJECT_URL . '/admin/venues');
+        exit();
+    }
 }
