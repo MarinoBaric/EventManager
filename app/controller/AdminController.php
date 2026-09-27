@@ -253,4 +253,66 @@ class AdminController extends Controller {
         header('location: ' . PROJECT_URL . '/admin/venues');
         exit();
     }
+
+    /**
+     * Displays the list of all users.
+     *
+     * @return void
+     */
+    public function users(): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $userModel = new UserModel();
+        $data = ['role' => $_SESSION['role'], 'users' => $userModel->getAll()];
+        $this->view($data);
+    }
+
+    /**
+     * Displays the form for adding a new user.
+     *
+     * @return void
+     */
+    public function adduser(): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $roleModel = new RoleModel();
+        $data = ['role' => $_SESSION['role'], 'roles' => $roleModel->getAll()];
+        $this->view($data);
+    }
+
+    /**
+     * Saves a new user and returns to the list of users.
+     *
+     * @return void
+     */
+    public function insertuser(): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $userModel = new UserModel();
+        $ok = $userModel->insert(
+            $_POST['firstName'],
+            $_POST['lastName'],
+            $_POST['email'],
+            $_POST['username'],
+            $_POST['password'],
+            $_POST['userRole']
+        );
+
+        if ($ok) {
+            header('location: ' . PROJECT_URL . '/admin/users');
+        } else {
+            header('location: ' . PROJECT_URL . '/admin/adduser');
+        }
+
+        exit();
+    }
 }
