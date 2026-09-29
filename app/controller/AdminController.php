@@ -315,4 +315,81 @@ class AdminController extends Controller {
 
         exit();
     }
+
+    /**
+     * Displays the form for editing a user.
+     *
+     * @param array $params The route parameters; the first one is the user id.
+     * @return void
+     */
+    public function edituser(array $params): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $userModel = new UserModel();
+        $user = $userModel->getById($params[0]);
+
+        if ($user) {
+            $roleModel = new RoleModel();
+            $data = [
+                'role' => $_SESSION['role'],
+                'user' => $user,
+                'roles' => $roleModel->getAll()
+            ];
+            $this->view($data);
+        } else {
+            header('location: ' . PROJECT_URL . '/admin/users');
+            exit();
+        }
+    }
+
+    /**
+     * Saves the submitted user data and returns to the list of users.
+     *
+     * @return void
+     */
+    public function updateuser(): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $userModel = new UserModel();
+        $ok = $userModel->update(
+            $_POST['attendee_id'],
+            $_POST['firstName'],
+            $_POST['lastName'],
+            $_POST['email'],
+            $_POST['username'],
+            $_POST['userRole']
+        );
+
+        if ($ok) {
+            header('location: ' . PROJECT_URL . '/admin/users');
+        } else {
+            header('location: ' . PROJECT_URL . '/admin/edituser/' . $_POST['attendee_id']);
+        }
+
+        exit();
+    }
+
+    /**
+     * Deletes a user and returns to the list of users.
+     *
+     * @param array $params The route parameters; the first one is the user id.
+     * @return void
+     */
+    public function deleteuser(array $params): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $userModel = new UserModel();
+        $userModel->delete($params[0]);
+        header('location: ' . PROJECT_URL . '/admin/users');
+        exit();
+    }
 }
