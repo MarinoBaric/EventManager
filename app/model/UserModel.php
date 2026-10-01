@@ -292,4 +292,42 @@ class UserModel extends Model {
         $this->query('DELETE FROM attendee_event WHERE attendee_id = :id', ['id' => $id]);
         return $this->query('DELETE FROM attendee WHERE attendee_id = :id', ['id' => $id]);
     }
+
+    /**
+     * Retrieves all users registered for the given event.
+     *
+     * @param int $eventId The id of the event.
+     * @return array The array of UserModel objects.
+     */
+    public function getByEvent(int $eventId): array {
+        return $this->queryAll(
+            'SELECT attendee.attendee_id, attendee.first_name, attendee.last_name,
+                    attendee.email, attendee.username
+             FROM attendee
+             JOIN attendee_event ON attendee.attendee_id = attendee_event.attendee_id
+             WHERE attendee_event.event_id = :event_id
+             ORDER BY attendee.last_name', 'UserModel',
+            ['event_id' => $eventId]
+        );
+    }
+
+    /**
+     * Retrieves all users who are not yet registered for the given event.
+     *
+     * @param int $eventId The id of the event.
+     * @return array The array of UserModel objects.
+     */
+    public function getNotRegistered(int $eventId): array {
+        return $this->queryAll(
+            'SELECT attendee.attendee_id, attendee.first_name, attendee.last_name,
+                    attendee.email, attendee.username
+             FROM attendee
+             LEFT JOIN attendee_event
+                    ON attendee.attendee_id = attendee_event.attendee_id
+                   AND attendee_event.event_id = :event_id
+             WHERE attendee_event.attendee_id IS NULL
+             ORDER BY attendee.last_name', 'UserModel',
+            ['event_id' => $eventId]
+        );
+    }
 }
