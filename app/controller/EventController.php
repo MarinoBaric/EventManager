@@ -40,4 +40,25 @@ class EventController extends Controller {
         ];
         $this->view($data);
     }
+
+    /**
+     * Displays the details of a single event.
+     *
+     * @return void
+     */
+    public function eventdetails(array $params): void {
+        if (!isset($_SESSION['role'])) {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $event = $this->model()->getById($params[0]);
+        if($event){
+            $data = ['role' => $_SESSION['role'], 'event' => $event];
+            $this->view($data);
+        } else{
+            header('location: ' . PROJECT_URL . '/event/events');
+        }
+        
+    }
 }
