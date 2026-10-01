@@ -61,4 +61,67 @@ class EventController extends Controller {
         }
         
     }
+
+    /**
+     * Displays the list of users registered for an event.
+     *
+     * @param array $params The route parameters; the first one is the event id.
+     * @return void
+     */
+    public function registered(array $params): void {
+        if (!isset($_SESSION['role'])) {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $event = $this->model()->getById($params[0]);
+
+        if ($event) {
+            $userModel = new UserModel();
+            $data = [
+                'role' => $_SESSION['role'],
+                'event' => $event,
+                'users' => $userModel->getByEvent($params[0]),
+                'available' => $userModel->getNotRegistered($params[0])
+            ];
+            $this->view($data);
+        } else {
+            header('location: ' . PROJECT_URL . '/event/events');
+            exit();
+        }
+    }
+
+    /**
+     * Registers the logged in user for an event.
+     *
+     * @param array $params The route parameters; the first one is the event id.
+     * @return void
+     */
+    public function registerevent(array $params): void {
+        if (!isset($_SESSION['role'])) {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $this->model()->register($_SESSION['attendee_id'], $params[0]);
+        header('location: ' . PROJECT_URL . '/event/myevents');
+        exit();
+    }
+
+    /**
+     * Removes the logged in user's registration for an event.
+     *
+     * @param array $params The route parameters; the first one is the event id.
+     * @return void
+     */
+    public function unregisterevent(array $params): void {
+        if (!isset($_SESSION['role'])) {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $this->model()->unregister($_SESSION['attendee_id'], $params[0]);
+        header('location: ' . PROJECT_URL . '/event/myevents');
+        exit();
+    }
 }
