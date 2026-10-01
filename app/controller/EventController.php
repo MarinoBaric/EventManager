@@ -22,4 +22,22 @@ class EventController extends Controller {
         $this->view($data);
         
     }
+
+    /**
+     * Displays the events the current user has registered for.
+     *
+     * @return void
+     */
+    public function myevents(): void {
+        if (!isset($_SESSION['role'])) {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+        
+        $data = [
+            'role' => $_SESSION['role'],
+            'events' => $this->model()->getByAttendee($_SESSION['attendee_id'])
+        ];
+        $this->view($data);
+    }
 }
