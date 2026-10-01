@@ -177,4 +177,55 @@ class EventModel extends Model{
 
         return true;
     }
+
+    /**
+     * Retrieves all events the given attendee has registered for.
+     *
+     * @param int $attendeeId The id of the attendee.
+     * @return array The array of EventModel objects.
+    */
+    public function getByAttendee(int $attendeeId): array {
+        return $this->queryAll(
+            'SELECT event.event_id, event.name AS event_name, event.start_date,
+                    event.end_date, event.allowed_number, venue.name AS venue_name
+             FROM event
+             JOIN venue ON event.venue_id = venue.venue_id
+             JOIN attendee_event ON event.event_id = attendee_event.event_id
+             WHERE attendee_event.attendee_id = :attendee_id
+             ORDER BY event.start_date', 'EventModel',
+            ['attendee_id' => $attendeeId]
+        );
+    }
+
+    /**
+     * Registers the given attendee for the given event.
+     *
+     * @param int $attendeeId The id of the attendee.
+     * @param int $eventId The id of the event.
+     * @return int The number of inserted rows.
+     */
+    public function register(int $attendeeId, int $eventId): int {
+        return $this->query(
+            'INSERT INTO attendee_event (attendee_id, event_id)
+             VALUES (:attendee_id, :event_id)',
+            ['attendee_id' => $attendeeId, 'event_id' => $eventId]
+        );
+    }
+
+    /**
+     * Removes the given attendee's registration for the given event.
+     *
+     * @param int $attendeeId The id of the attendee.
+     * @param int $eventId The id of the event.
+     * @return int The number of deleted rows.
+     */
+    public function unregister(int $attendeeId, int $eventId): int {
+        return $this->query(
+            'DELETE FROM attendee_event
+             WHERE attendee_id = :attendee_id AND event_id = :event_id',
+            ['attendee_id' => $attendeeId, 'event_id' => $eventId]
+        );
+    }
+
+    
 }
