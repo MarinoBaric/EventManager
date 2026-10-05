@@ -392,4 +392,39 @@ class AdminController extends Controller {
         header('location: ' . PROJECT_URL . '/admin/users');
         exit();
     }
+
+    /**
+     * Removes an attendee's registration for an event.
+     *
+     * @param array $params The route parameters: event id, attendee id.
+     * @return void
+     */
+    public function removeattendee(array $params): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $eventModel = new EventModel();
+        $eventModel->unregister($params[1], $params[0]);
+        header('location: ' . PROJECT_URL . '/event/registered/' . $params[0]);
+        exit();
+    }
+
+    /**
+     * Registers an attendee for an event.
+     *
+     * @return void
+     */
+    public function addattendee(): void {
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header('location: ' . PROJECT_URL);
+            exit();
+        }
+
+        $eventModel = new EventModel();
+        $eventModel->register($_POST['attendee_id'], $_POST['event_id']);
+        header('location: ' . PROJECT_URL . '/event/registered/' . $_POST['event_id']);
+        exit();
+    }
 }
